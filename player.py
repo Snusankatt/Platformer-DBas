@@ -18,6 +18,7 @@ class Player:
         self.speedCap = 500
         self.gravity = 4000
         self.friction = self._ground_friction
+        self._onground = False
 
         """
         Animations
@@ -79,8 +80,8 @@ class Player:
         self.rect = self.image.get_rect(topleft=(self.posX, self.posY))
 
     def update(self, T, platforms):
-        self._updateX(T)
-        self._updateY(T)
+        self._updateX(T, platforms)
+        self._updateY(T, platforms)
         self._updateAnimation(T)
 
     """
@@ -114,9 +115,10 @@ class Player:
             self.velX = 0
 
         # Platform collision detection
+        """
         if self.rect.collidelist(platforms):
             self.velX = 0
-
+        """
 
         # Update position
         self.posX += self.velX * T
@@ -127,6 +129,9 @@ class Player:
 
     def _updateY(self, T, platforms):
 
+        # Standard state is not on ground
+        self._onground = False
+
         # Apply accel upward
         self.velY += self.accY * T
         # Apply gravity
@@ -135,6 +140,16 @@ class Player:
         # Ground check
         if self.posY + self.rect.height >= 1080 and self.velY > 0:
             self.posY = 1080 - self.rect.height
+            self._onground = True
+        else:
+            self.friction = self._air_friction
+
+        # Platform collision, -1 means no collision
+        if self.rect.collidelist(platforms) != -1:
+            self._onground = True
+
+        # Ground logic
+        if self._onground:
             self.velY = 0
             self.friction = self._ground_friction
         else:

@@ -39,6 +39,7 @@ def main():
     # Skapa spelaren
     p = player.Player()
 
+
     # Create the level
     platforms = load_level("map.txt")
 
@@ -81,11 +82,14 @@ def main():
         """
         # Reset screen
         screen.fill((0, 0, 0))
+        # Platforms
+        for plat in platforms:
+            screen.blit(plat.image, plat.rect)
 
         """
         Display and player update
         """
-        p.update(dt)
+        p.update(dt, platforms)
 
         # Draw Player
         screen.blit(p.image, p.rect)
