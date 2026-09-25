@@ -39,9 +39,17 @@ def main():
     # Skapa spelaren
     p = player.Player()
 
-
     # Create the level
     platforms = load_level("map.txt")
+
+    # Create bg image
+    bg_image = pygame.image.load("assets/background.jpeg")
+    bg_image = pygame.transform.scale(bg_image, (1920, 1080))
+    # Make it darker to distinguish fore/background
+    darken_overlay = pygame.Surface((1920, 1080))
+    darken_overlay.fill((0, 0, 0))
+    darken_overlay.set_alpha(100)
+    bg_image.blit(darken_overlay, (0, 0))
 
     while True:
         """
@@ -82,6 +90,8 @@ def main():
         """
         # Reset screen
         screen.fill((0, 0, 0))
+        # Draw bg
+        screen.blit(bg_image, (0, 0))
         # Platforms
         for plat in platforms:
             screen.blit(plat.image, plat.rect)

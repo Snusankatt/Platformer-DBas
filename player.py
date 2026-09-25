@@ -21,6 +21,11 @@ class Player:
         self.on_ground = False
 
         """
+        States
+        """
+        self.is_alive = True
+
+        """
         Animations
         """
         self._spriteSheet = pygame.image.load('assets/knight.png')
@@ -230,6 +235,10 @@ class Player:
 
             if self._facing_left:
                 self.image = pygame.transform.flip(self.image, True, False)
+
+    def _updateState(self, untouchables):
+
+
 
 
 
