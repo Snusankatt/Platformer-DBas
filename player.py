@@ -164,7 +164,7 @@ class Player:
         else:
             self._current_idle_frame += self._animation_speed * T
 
-            if self._current_idle_frame > len(self._idle_frames):
+            if self._current_idle_frame >= len(self._idle_frames):
                 self._current_idle_frame = 0
 
             self.image = self._idle_frames[int(self._current_idle_frame)]
