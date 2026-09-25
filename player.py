@@ -7,4 +7,13 @@ class Player:
         self.accX = 0
         self.accY = 0
 
+        self.speedCap = 10
+
         self.isAlive = True
+
+        def accelerateRight(self, acc, time):
+            self.accX = acc
+
+        while self.velX <= self.speedCap:
+            self.velX =
+
