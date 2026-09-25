@@ -12,8 +12,14 @@ def main():
     p = player.Player()
 
     while True:
-
+        """
+        Time and physics
+        """
+        # Set delta time, used for out of frame physics calculations
         dt = clock.tick(60) / 1000
+        # Set initial player values, may or may not update
+        p.accX = 0
+        p.accY = -500 # Gravity
 
         """
         Event handling discrete inputs
@@ -22,14 +28,19 @@ def main():
             if event.type == pygame.QUIT:
                 break
 
+
         """
         Event handling continuous inputs
         """
         keys = pygame.key.get_pressed()
+        if keys[pygame.K_RIGHT]:
+            p.accX = 2000
+
         if keys[pygame.K_LEFT]:
-            p.accelerate(5, dt)
+            p.accX = -2000
 
-
+        if keys[pygame.K_UP] and (p.rect.bottom == 1080):
+            p.accY = -70000
         """
         Rendering
         """
@@ -37,11 +48,14 @@ def main():
         screen.fill((0, 0, 0))
 
         # Draw Player
-        pygame.draw.rect(screen, "red", p.posX, p.posY)
+        pygame.draw.rect(screen, "red", p.rect)
 
         """
-        Display update
+        Display and player update
         """
+        p.updateX(dt)
+        p.updateY(dt)
+
         pygame.display.flip()
 
 
