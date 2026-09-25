@@ -75,7 +75,7 @@ def main():
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             p.accX = -4000
 
-        if (keys[pygame.K_UP] or keys[pygame.K_SPACE] or keys[pygame.K_w]) and (p.rect.bottom == 1080):
+        if (keys[pygame.K_UP] or keys[pygame.K_SPACE] or keys[pygame.K_w]) and (p.on_ground == True):
             p.accY = -70000
         """
         Rendering

@@ -18,7 +18,7 @@ class Player:
         self.speedCap = 500
         self.gravity = 4000
         self.friction = self._ground_friction
-        self._onground = False
+        self.on_ground = False
 
         """
         Animations
@@ -97,6 +97,11 @@ class Player:
         self.velX += self.accX * T
         self.velX *= self.friction
 
+        # Update position
+        self.posX += self.velX * T
+        # Send new pos to rect
+        self.rect.x = self.posX
+
 
         # Code to so it's impossible to accelerate over speed cap
         if self.velX >= self.speedCap:
@@ -115,51 +120,63 @@ class Player:
             self.velX = 0
 
         # Platform collision detection
-        """
-        if self.rect.collidelist(platforms):
-            self.velX = 0
-        """
+        for plat in platforms:
+            if self.rect.colliderect(plat.rect):
+                if self.velX > 0:
+                    self.rect.right = plat.rect.left
+                    self.posX = self.rect.x
+                    self.velX = 0
 
-        # Update position
-        self.posX += self.velX * T
+                elif self.velX < 0:
+                    self.rect.left = plat.rect.right
+                    self.posX = self.rect.x
+                    self.velX = 0
 
-        # Send new pos to rect
-        self.rect.x = self.posX
 
 
     def _updateY(self, T, platforms):
+        ## Physics calculations ##
 
         # Standard state is not on ground
-        self._onground = False
+        self.on_ground = False
 
         # Apply accel upward
         self.velY += self.accY * T
         # Apply gravity
         self.velY += self.gravity * T
 
+        # Update pos
+        self.posY += self.velY * T
+        # Send pos to rect
+        self.rect.y = self.posY
+
+        ## Collision Checks ##
+
         # Ground check
         if self.posY + self.rect.height >= 1080 and self.velY > 0:
             self.posY = 1080 - self.rect.height
-            self._onground = True
-        else:
-            self.friction = self._air_friction
+            self.velY = 0
+            self.on_ground = True
 
-        # Platform collision, -1 means no collision
-        if self.rect.collidelist(platforms) != -1:
-            self._onground = True
+        # Platform collision
+        for plat in platforms:
+            if self.rect.colliderect(plat.rect):
+                if self.velY > 0:
+                    self.rect.bottom = plat.rect.top
+                    self.posY = int(self.rect.y)
+                    self.on_ground = True
+                if self.velY < 0:
+                    self.rect.top = plat.rect.bottom
+                    self.posY = int(self.rect.y)
+                    self.velY = 0
+
 
         # Ground logic
-        if self._onground:
+        if self.on_ground:
             self.velY = 0
             self.friction = self._ground_friction
         else:
             self.friction = self._air_friction
-
-        # Update pos
-        self.posY += self.velY * T
-
-        # Send pos to rect
-        self.rect.y = self.posY
 
     """
     Animations
