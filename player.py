@@ -88,6 +88,7 @@ class Player:
     Physics
     """
     def _updateX(self, T, platforms):
+        ## Physics Calculations ##
 
         # Cancel velocity if it's too small to prevent sliding forever
         if abs(self.velX) < 30:
@@ -102,6 +103,7 @@ class Player:
         # Send new pos to rect
         self.rect.x = self.posX
 
+        ## Collision checks ##
 
         # Code to so it's impossible to accelerate over speed cap
         if self.velX >= self.speedCap:
@@ -120,22 +122,27 @@ class Player:
             self.velX = 0
 
         # Platform collision detection
-        for plat in platforms:
+        if self.rect.collidelist(platforms) != -1:
+            # Get correct plat object
+            ind = self.rect.collidelist(platforms)
+            plat = platforms[ind]
+            # If colliding currently
             if self.rect.colliderect(plat.rect):
+                # Hitting from the right
                 if self.velX > 0:
+                    # Snap body to edge and stop
                     self.rect.right = plat.rect.left
                     self.posX = self.rect.x
                     self.velX = 0
 
+                # Hitting from the left
                 elif self.velX < 0:
                     self.rect.left = plat.rect.right
                     self.posX = self.rect.x
                     self.velX = 0
 
-
-
     def _updateY(self, T, platforms):
-        ## Physics calculations ##
+        ## Physics calc ##
 
         # Standard state is not on ground
         self.on_ground = False
@@ -159,13 +166,25 @@ class Player:
             self.on_ground = True
 
         # Platform collision
-        for plat in platforms:
+        if self.rect.collidelist(platforms) != -1: # -1 if no collision
+            # Get index for the collided rect
+            ind = self.rect.collidelist(platforms)
+            # Grab the actual platforms rect
+            plat = platforms[ind]
+            # If we are colliding with this specific platform
             if self.rect.colliderect(plat.rect):
+                # Falling onto the platform
                 if self.velY > 0:
+                    # Snap player bottom to platform top
                     self.rect.bottom = plat.rect.top
+                    # Set internal player pos correct value
                     self.posY = int(self.rect.y)
+                    # Set on ground flag
                     self.on_ground = True
-                if self.velY < 0:
+
+                # Hitting head on platform
+                elif self.velY < 0:
+                    # Snap head and set pos to correct
                     self.rect.top = plat.rect.bottom
                     self.posY = int(self.rect.y)
                     self.velY = 0
