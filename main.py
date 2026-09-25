@@ -38,13 +38,13 @@ def main():
         Event handling continuous inputs
         """
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_RIGHT]:
+        if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
             p.accX = 2000
 
-        if keys[pygame.K_LEFT]:
+        if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             p.accX = -2000
 
-        if keys[pygame.K_UP] and (p.rect.bottom == 1080):
+        if (keys[pygame.K_UP] or keys[pygame.K_SPACE] or keys[pygame.K_w]) and (p.rect.bottom == 1080):
             p.accY = -70000
         """
         Rendering
