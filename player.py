@@ -5,8 +5,8 @@ class Player:
         """
         Physics
         """
-        self._ground_friction = 0.95
-        self._air_friction = 0.98
+        self._ground_friction = 0.90
+        self._air_friction = 0.99
 
         self.posX = 0
         self.posY = 0
@@ -15,7 +15,7 @@ class Player:
         self.accX = 0
         self.accY = 0
 
-        self.speedCap = 750
+        self.speedCap = 500
         self.gravity = 4000
         self.friction = self._ground_friction
 

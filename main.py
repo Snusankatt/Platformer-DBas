@@ -19,7 +19,7 @@ def main():
         dt = clock.tick(60) / 1000
         # Set initial player values, may or may not update
         p.accX = 0
-        p.accY = -500 # Gravity
+        p.accY = 0
 
         """
         Event handling discrete inputs
@@ -33,16 +33,15 @@ def main():
             sys.exit()
 
 
-
         """
         Event handling continuous inputs
         """
         keys = pygame.key.get_pressed()
         if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
-            p.accX = 2000
+            p.accX = 4000
 
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
-            p.accX = -2000
+            p.accX = -4000
 
         if (keys[pygame.K_UP] or keys[pygame.K_SPACE] or keys[pygame.K_w]) and (p.rect.bottom == 1080):
             p.accY = -70000
