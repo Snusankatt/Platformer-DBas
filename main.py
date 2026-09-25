@@ -19,12 +19,12 @@ def load_level(level):
     for row_index, row_string in enumerate(level_map):
         for col_index, char in enumerate(row_string):
 
-            if char == "P":
+            if char in ("P", "p", "G"):
                 # Add the platform with correct coords
                 x_pos = col_index * tile_size
                 y_pos = row_index * tile_size
                 # Append to the platform list
-                new_platform = platform.Platform(x_pos, y_pos, tile_size, tile_size)
+                new_platform = platform.Platform(x_pos, y_pos, char)
                 level_platforms.append(new_platform)
 
     # Return the platforms list
