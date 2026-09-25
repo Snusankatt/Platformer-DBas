@@ -1,6 +1,34 @@
+import platform
 import player
 import pygame
 import sys
+
+def load_level(level):
+    # Create the map list
+    level_map = []
+    # Open file and put all lines in level_map
+    with open(level) as f:
+        for line in f:
+            level_map.append(line)
+
+    # Set tile size and create the "platform list"
+    tile_size = 64
+    level_platforms = []
+
+    # Row index becomes y pos and col index the x pos
+    for row_index, row_string in enumerate(level_map):
+        for col_index, char in enumerate(row_string):
+
+            if char == "P":
+                # Add the platform with correct coords
+                x_pos = col_index * tile_size
+                y_pos = row_index * tile_size
+                # Append to the platform list
+                new_platform = platform.Platform(x_pos, y_pos, tile_size, tile_size)
+                level_platforms.append(new_platform)
+
+    # Return the platforms list
+    return level_platforms
 
 def main():
     # Starta pygame med ett fönster, sätt storlek och skapa klockan
@@ -11,11 +39,14 @@ def main():
     # Skapa spelaren
     p = player.Player()
 
+    # Create the level
+    platforms = load_level("map.txt")
+
     while True:
         """
         Time and physics
         """
-        # Set delta time, used for out of frame physics calculations
+        # Set delta time, used for out of frame physics calculations and animations
         dt = clock.tick(60) / 1000
         # Set initial player values, may or may not update
         p.accX = 0

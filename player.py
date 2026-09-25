@@ -78,7 +78,7 @@ class Player:
         self.image = self._idle_frames[0]
         self.rect = self.image.get_rect(topleft=(self.posX, self.posY))
 
-    def update(self, T):
+    def update(self, T, platforms):
         self._updateX(T)
         self._updateY(T)
         self._updateAnimation(T)
@@ -86,7 +86,7 @@ class Player:
     """
     Physics
     """
-    def _updateX(self, T):
+    def _updateX(self, T, platforms):
 
         # Cancel velocity if it's too small to prevent sliding forever
         if abs(self.velX) < 30:
@@ -96,6 +96,7 @@ class Player:
         self.velX += self.accX * T
         self.velX *= self.friction
 
+
         # Code to so it's impossible to accelerate over speed cap
         if self.velX >= self.speedCap:
             self.velX = self.speedCap
@@ -103,12 +104,19 @@ class Player:
             self.velX = -self.speedCap
 
         # Code to stop going out of the screen
+        # Left side
         if self.posX <= 0 and self.velX < 0:
             self.posX = 0
             self.velX = 0
+        # Right side
         if self.posX + self.rect.width >= 1920 and self.velX > 0:
             self.posX = 1920 - self.rect.width
             self.velX = 0
+
+        # Platform collision detection
+        if self.rect.collidelist(platforms):
+            self.velX = 0
+
 
         # Update position
         self.posX += self.velX * T
@@ -117,7 +125,7 @@ class Player:
         self.rect.x = self.posX
 
 
-    def _updateY(self, T):
+    def _updateY(self, T, platforms):
 
         # Apply accel upward
         self.velY += self.accY * T
