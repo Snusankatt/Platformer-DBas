@@ -47,14 +47,13 @@ def main():
         # Reset screen
         screen.fill((0, 0, 0))
 
-        # Draw Player
-        pygame.draw.rect(screen, "red", p.rect)
-
         """
         Display and player update
         """
-        p.updateX(dt)
-        p.updateY(dt)
+        p.update(dt)
+
+        # Draw Player
+        screen.blit(p.image, p.rect)
 
         pygame.display.flip()
 
