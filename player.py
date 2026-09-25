@@ -83,6 +83,9 @@ class Player:
         self._updateY(T)
         self._updateAnimation(T)
 
+    """
+    Physics
+    """
     def _updateX(self, T):
 
         # Cancel velocity if it's too small to prevent sliding forever
@@ -113,6 +116,7 @@ class Player:
         # Send new pos to rect
         self.rect.x = self.posX
 
+
     def _updateY(self, T):
 
         # Apply accel upward
@@ -134,6 +138,9 @@ class Player:
         # Send pos to rect
         self.rect.y = self.posY
 
+    """
+    Animations
+    """
     def _updateAnimation(self, T):
         # If moving
         if abs(self.velX) > 0.1:

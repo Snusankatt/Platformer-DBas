@@ -28,6 +28,11 @@ def main():
             if event.type == pygame.QUIT:
                 break
 
+        if pygame.key.get_pressed()[pygame.K_DELETE]:
+            pygame.quit()
+            sys.exit()
+
+
 
         """
         Event handling continuous inputs
