@@ -13,7 +13,6 @@ class Player:
         self.velX = 0
         self.velY = 0
         self.accX = 0
-        self.accY = 0
 
         self.speedCap = 500
         self.gravity = 4000
@@ -67,25 +66,38 @@ class Player:
             frame_y = 3*self._frame_height if i > 8 else 2*self._frame_height
 
             # Create the rect
-            rect = pygame.Rect(frame_x + offset_x, frame_y + offset_y, crop_width, crop_height)
+            rect = pygame.Rect(frame_x + offset_x - 1, frame_y + offset_y, crop_width + 1, crop_height)
             # Create and rescale
             image = self._spriteSheet.subsurface(rect)
-            image = pygame.transform.scale(image, (39, 57))
+            image = pygame.transform.scale(image, (42, 57))
             # Append the image to list
             self._running_frames.append(image)
+
+        self._death_frames = []
+        for i in range(4):
+            frame_x = i * self._frame_width
+            frame_y = 7 * self._frame_height
+
+            rect = pygame.Rect(frame_x + offset_x, frame_y + offset_y, crop_width + 5, crop_height)
+
+            image = self._spriteSheet.subsurface(rect)
+            image = pygame.transform.scale(image, (54, 57))
+            self._death_frames.append(image)
 
 
         # Init values for animation
         self._animation_speed = 10
         self._current_idle_frame = 0
         self._current_running_frame = 0
+        self._current_death_frame = 0
 
         # Set the player image, rect, and hitbox
         self.image = self._idle_frames[0]
         self.rect = self.image.get_rect(topleft=(self.posX, self.posY))
 
 
-    def update(self, T, platforms):
+    def update(self, T, platforms, enemies):
+        self._updateState(enemies)
         self._updateX(T, platforms)
         self._updateY(T, platforms)
         self._updateAnimation(T)
@@ -153,8 +165,6 @@ class Player:
         # Standard state is not on ground
         self.on_ground = False
 
-        # Apply accel upward
-        self.velY += self.accY * T
         # Apply gravity
         self.velY += self.gravity * T
 
@@ -207,6 +217,21 @@ class Player:
     Animations
     """
     def _updateAnimation(self, T):
+
+        # Death animation
+        if not self.is_alive:
+            self._current_death_frame += self._animation_speed * T
+
+            if self._current_death_frame >= len(self._death_frames) - 1:
+                self._current_death_frame = len(self._death_frames) - 1
+
+            self.image = self._death_frames[int(self._current_death_frame)]
+
+            if self._facing_left:
+                self.image = pygame.transform.flip(self.image, True, False)
+
+            return
+
         # If moving
         if abs(self.velX) > 0.1:
             # Advance the current idle frame
@@ -237,5 +262,18 @@ class Player:
             if self._facing_left:
                 self.image = pygame.transform.flip(self.image, True, False)
 
-    def _updateState(self, untouchables):
-        return null
+    """
+    States and events
+    """
+
+    def _updateState(self, enemies):
+        # Enemy collision detection
+        if self.rect.collidelist(enemies) != -1:
+            ind = self.rect.collidelist(enemies)
+            enemy = enemies[ind]
+            if self.rect.colliderect(enemy):
+                if self.is_alive:
+                    self.is_alive = False
+
+    def die(self):
+        print("du dog")

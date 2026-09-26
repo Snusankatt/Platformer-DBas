@@ -61,7 +61,8 @@ def main():
     darken_overlay.set_alpha(100)
     bg_image.blit(darken_overlay, (0, 0))
 
-    while True:
+    running = True
+    while running:
         """
         Time and physics
         """
@@ -69,32 +70,35 @@ def main():
         dt = clock.tick(60) / 1000
         # Set initial player values, may or may not update
         p.accX = 0
-        p.accY = 0
 
         """
         Event handling discrete inputs
         """
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                break
+                running = False
 
         if pygame.key.get_pressed()[pygame.K_DELETE]:
             pygame.quit()
             sys.exit()
+
+        if not p.is_alive:
+
 
 
         """
         Event handling continuous inputs
         """
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
-            p.accX = 4000
+        if p.is_alive:
+            if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+                p.accX = 4000
 
-        if keys[pygame.K_LEFT] or keys[pygame.K_a]:
-            p.accX = -4000
+            if keys[pygame.K_LEFT] or keys[pygame.K_a]:
+                p.accX = -4000
 
-        if (keys[pygame.K_UP] or keys[pygame.K_SPACE] or keys[pygame.K_w]) and (p.on_ground == True):
-            p.accY = -80000
+            if (keys[pygame.K_UP] or keys[pygame.K_SPACE] or keys[pygame.K_w]) and (p.on_ground == True):
+                p.velY = -1300
         """
         Rendering
         """
@@ -114,7 +118,7 @@ def main():
         """
         Display and player update
         """
-        p.update(dt, platforms)
+        p.update(dt, platforms, enemies)
 
         # Draw Player
         screen.blit(p.image, p.rect)
