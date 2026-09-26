@@ -237,8 +237,4 @@ class Player:
                 self.image = pygame.transform.flip(self.image, True, False)
 
     def _updateState(self, untouchables):
-
-
-
-
-
+        return null
