@@ -7,8 +7,8 @@ class Player:
         """
         Physics
         """
-        self._ground_friction = 0.90
-        self._air_friction = 0.99
+        self._ground_friction = 0.85
+        self._air_friction = 0.95
 
         self.posX = 0
         self.posY = 0
@@ -17,7 +17,7 @@ class Player:
         self.accX = 0
 
         self.speedCap = 500
-        self.running_speed = 4000
+        self.running_speed = 5000
         self.jump_force = -1300
         self.gravity = 4000
         self.friction = self._ground_friction
@@ -28,6 +28,7 @@ class Player:
         States
         """
         self.is_alive = True
+        self.has_won = False
 
         """
         Animations
@@ -102,8 +103,8 @@ class Player:
         self.rect = self.image.get_rect(topleft=(self.posX, self.posY))
 
 
-    def update(self, T, platforms, enemies):
-        self._updateState(enemies)
+    def update(self, T, platforms, enemies, prizes):
+        self._updateState(enemies, prizes)
         self._updateX(T, platforms)
         self._updateY(T, platforms)
         self._updateAnimation(T)
@@ -272,7 +273,7 @@ class Player:
     States and events
     """
 
-    def _updateState(self, enemies):
+    def _updateState(self, enemies, prizes):
         # Enemy collision detection
         if self.rect.collidelist(enemies) != -1:
             ind = self.rect.collidelist(enemies)
@@ -281,5 +282,11 @@ class Player:
                 if self.is_alive:
                     self.is_alive = False
 
-    def die(self):
-        print("du dog")
+        # Win collision detection
+        if self.rect.collidelist(prizes) != -1:
+            ind = self.rect.collidelist(prizes)
+            prize = prizes[ind]
+            if self.rect.colliderect(prize):
+                if self.is_alive:
+                    self.has_won = True
+                    prize.is_collected = True

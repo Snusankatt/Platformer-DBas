@@ -3,6 +3,7 @@ import player
 import pygame
 import sys
 import enemy
+import prize
 
 # Constants
 SCREEN_WIDTH = 1920
@@ -23,6 +24,8 @@ def load_level(level):
 
     level_enemies = []
 
+    level_prizes = []
+
     # Row index becomes y pos and col index the x pos
     for row_index, row_string in enumerate(level_map):
         for col_index, char in enumerate(row_string):
@@ -41,18 +44,32 @@ def load_level(level):
                 new_enemy = enemy.Enemy(x_pos, y_pos)
                 level_enemies.append(new_enemy)
 
+            if char == "C":
+                x_pos = col_index * tile_size
+                y_pos = row_index * tile_size
+                # Append to prizes list
+                new_prize = prize.Prize(x_pos, y_pos)
+                level_prizes.append(new_prize)
+
 
     # Return the platforms list
-    return level_platforms, level_enemies
+    return level_platforms, level_enemies, level_prizes
 
-def end_screen(screen, game_over_text, text_rect, button_rect, button_text, button_text_rect):
+def end_screen(screen, game_over_text, text_rect):
     # GAME OVER text
     screen.blit(game_over_text, text_rect)
 
+def win_screen(screen, win_text, text_rect):
+    # YOU WIN text
+    screen.blit(win_text, text_rect)
+
+def show_exit_button(screen, button_rect, button_text, button_text_rect):
     # Exit button
     pygame.draw.rect(screen, "red", button_rect)
     # Text for button
     screen.blit(button_text, button_text_rect)
+
+
 
 def main():
     # Starta pygame
@@ -66,8 +83,11 @@ def main():
 
     # GAME OVER text
     game_over_text = large_font.render("GAME OVER", False, (255, 255, 255))
-
     go_text_rect = game_over_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+
+    # YOU WON text
+    you_won_text = large_font.render("YOU WIN!", False, "green")
+    yw_text_rect = you_won_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
 
     # Exit button
     button_rect = pygame.Rect(0, 0, 500, 120)
@@ -85,7 +105,7 @@ def main():
     p = player.Player(SCREEN_WIDTH, SCREEN_HEIGHT)
 
     # Create the level
-    platforms, enemies = load_level("map.txt")
+    platforms, enemies, prizes = load_level("map.txt")
 
     # Create bg image
     bg_image = pygame.image.load("assets/background.jpeg")
@@ -131,7 +151,7 @@ def main():
         Event handling continuous inputs
         """
         keys = pygame.key.get_pressed()
-        if p.is_alive:
+        if p.is_alive and not p.has_won:
             if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
                 p.accX = p.running_speed
 
@@ -156,10 +176,18 @@ def main():
             e.update(dt)
             screen.blit(e.image, e.rect)
 
+        # Prizes
+        for prize in prizes:
+            prize.update(dt)
+            if prize.should_be_killed:
+                prizes.remove(prize)
+            else:
+                screen.blit(prize.image, prize.rect)
+
         """
         Display and player update
         """
-        p.update(dt, platforms, enemies)
+        p.update(dt, platforms, enemies, prizes)
 
         # Draw Player
         screen.blit(p.image, p.rect)
@@ -169,7 +197,16 @@ def main():
             death_timer += dt
 
             if death_timer >= 1:
-                end_screen(screen, game_over_text, go_text_rect, button_rect, button_text, button_text_rect)
+                end_screen(screen, game_over_text, go_text_rect)
+                show_exit_button(screen, button_rect, button_text, button_text_rect)
+
+        # Draw win screen if done
+        if p.has_won:
+            death_timer += dt
+
+            if death_timer >= 1:
+                win_screen(screen, you_won_text, yw_text_rect)
+                show_exit_button(screen, button_rect, button_text, button_text_rect)
 
         pygame.display.flip()
 
