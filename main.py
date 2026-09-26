@@ -2,6 +2,7 @@ import platform
 import player
 import pygame
 import sys
+import enemy
 
 def load_level(level):
     # Create the map list
@@ -15,6 +16,8 @@ def load_level(level):
     tile_size = 64
     level_platforms = []
 
+    level_enemies = []
+
     # Row index becomes y pos and col index the x pos
     for row_index, row_string in enumerate(level_map):
         for col_index, char in enumerate(row_string):
@@ -27,8 +30,15 @@ def load_level(level):
                 new_platform = platform.Platform(x_pos, y_pos, char)
                 level_platforms.append(new_platform)
 
+            if char == "E":
+                x_pos = col_index * tile_size
+                y_pos = row_index * tile_size
+                new_enemy = enemy.Enemy(x_pos, y_pos)
+                level_enemies.append(new_enemy)
+
+
     # Return the platforms list
-    return level_platforms
+    return level_platforms, level_enemies
 
 def main():
     # Starta pygame med ett fönster, sätt storlek och skapa klockan
@@ -40,7 +50,7 @@ def main():
     p = player.Player()
 
     # Create the level
-    platforms = load_level("map.txt")
+    platforms, enemies = load_level("map.txt")
 
     # Create bg image
     bg_image = pygame.image.load("assets/background.jpeg")
@@ -95,6 +105,11 @@ def main():
         # Platforms
         for plat in platforms:
             screen.blit(plat.image, plat.rect)
+
+        # Enemies
+        for e in enemies:
+            e.update(dt)
+            screen.blit(e.image, e.rect)
 
         """
         Display and player update

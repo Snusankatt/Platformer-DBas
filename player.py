@@ -84,6 +84,7 @@ class Player:
         self.image = self._idle_frames[0]
         self.rect = self.image.get_rect(topleft=(self.posX, self.posY))
 
+
     def update(self, T, platforms):
         self._updateX(T, platforms)
         self._updateY(T, platforms)
