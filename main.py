@@ -45,19 +45,37 @@ def load_level(level):
     # Return the platforms list
     return level_platforms, level_enemies
 
-def end_screen(screen, font):
-    game_over_text = font.render("GAME OVER", False, (255, 255, 255))
-
-    text_rect = game_over_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+def end_screen(screen, game_over_text, text_rect, button_rect, button_text, button_text_rect):
+    # GAME OVER text
     screen.blit(game_over_text, text_rect)
 
+    # Exit button
+    pygame.draw.rect(screen, "red", button_rect)
+    # Text for button
+    screen.blit(button_text, button_text_rect)
 
 def main():
     # Starta pygame
     pygame.init()
 
+
+    # Prepare end screen
     # Load font
     large_font = pygame.font.Font("assets/PixelOperator8-Bold.ttf", 200)
+    small_font = pygame.font.Font("assets/PixelOperator8-Bold.ttf", 80)
+
+    # GAME OVER text
+    game_over_text = large_font.render("GAME OVER", False, (255, 255, 255))
+
+    go_text_rect = game_over_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+
+    # Exit button
+    button_rect = pygame.Rect(0, 0, 500, 120)
+    button_rect.center = (SCREEN_WIDTH // 2, (SCREEN_HEIGHT // 2) + 300)
+    button_text = small_font.render("EXIT", False, (255, 255, 255))
+    button_text_rect = button_text.get_rect(center=button_rect.center)
+
+
 
     # Load screen and clock
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -97,9 +115,16 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1 and button_rect.collidepoint(event.pos):
+                    pygame.quit()
+                    sys.exit()
+
+
         if pygame.key.get_pressed()[pygame.K_DELETE]:
             pygame.quit()
             sys.exit()
+
 
 
         """
@@ -144,7 +169,7 @@ def main():
             death_timer += dt
 
             if death_timer >= 1:
-                end_screen(screen, large_font)
+                end_screen(screen, game_over_text, go_text_rect, button_rect, button_text, button_text_rect)
 
         pygame.display.flip()
 
