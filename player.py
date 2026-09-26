@@ -286,7 +286,7 @@ class Player:
         if self.rect.collidelist(prizes) != -1:
             ind = self.rect.collidelist(prizes)
             prize = prizes[ind]
-            if self.rect.colliderect(prize):
+            if self.rect.colliderect(prize) and not prize.is_collected:
                 if self.is_alive:
                     self.has_won = True
                     prize.is_collected = True

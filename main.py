@@ -134,10 +134,10 @@ async def main():
     while running:
 
         # Create the dict that will be sent through network
-        player_data = {"x": p.rect.x, "y": p.rect.y,
+        player_data = {"x": p.rect.x, "y": p.rect.y, "vel": p.velX,
                        "is_alive": p.is_alive, "has_won": p.has_won, "facing_left": p._facing_left,
-                       "current_idle_frame": p._current_idle_frame, "current_running_frame": p._current_running_frame,
-                       "current_death_frame": p._current_death_frame}
+                       "current_idle_frame": p._current_idle_frame, "current_running_frame": p._current_running_frame, "current_death_frame": p._current_death_frame,
+                       "prizes": [prize.is_collected for prize in prizes]}
 
         # Package and send data
         writer.write(pickle.dumps(player_data))
@@ -155,12 +155,17 @@ async def main():
             if i != current_player_id:
                 p2.rect.x = ngs[i]["x"]
                 p2.rect.y = ngs[i]["y"]
+                p2.velX = ngs[i]["vel"]
                 p2.is_alive = ngs[i]["is_alive"]
                 p2.has_won = ngs[i]["has_won"]
                 p2._facing_left = ngs[i]["facing_left"]
                 p2._current_idle_frame = ngs[i]["current_idle_frame"]
                 p2._current_running_frame = ngs[i]["current_running_frame"]
                 p2._current_death_frame = ngs[i]["current_death_frame"]
+
+                prizes_collected = ngs[i]["prizes"]
+                for i, status in enumerate(prizes_collected):
+                    prizes[i].is_collected = status
 
         """
         Time and physics
@@ -221,32 +226,36 @@ async def main():
         # Prizes
         for prize in prizes:
             prize.update(dt)
-            if prize.should_be_killed:
-                prizes.remove(prize)
-            else:
+            if not prize.should_be_killed:
                 screen.blit(prize.image, prize.rect)
 
         """
         Display and player update
         """
         p.update(dt, platforms, enemies, prizes)
+        p2._updateAnimation(dt)
 
         # Draw Players
         screen.blit(p.image, p.rect)
         screen.blit(p2.image, p2.rect)
 
         # Draw ending if dead
-        if not p.is_alive:
+        if not p.is_alive and not p.has_won:
             death_timer += dt
 
             if death_timer >= 1:
                 end_screen(screen, game_over_text, go_text_rect)
-                show_exit_button(screen, button_rect, button_text, button_text_rect)
+
+                # Only let player exit if both are dead
+                if not p2.is_alive:
+                    show_exit_button(screen, button_rect, button_text, button_text_rect)
+
 
         # Draw win screen if done
-        if p.has_won:
-            death_timer += dt
+        if p.has_won or p2.has_won:
 
+            p.has_won = True
+            death_timer += dt
             if death_timer >= 1:
                 win_screen(screen, you_won_text, yw_text_rect)
                 show_exit_button(screen, button_rect, button_text, button_text_rect)
