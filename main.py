@@ -64,7 +64,7 @@ def main():
     clock = pygame.time.Clock()
 
     # Skapa spelaren
-    p = player.Player(SCREEN_HEIGHT, SCREEN_WIDTH)
+    p = player.Player(SCREEN_WIDTH, SCREEN_HEIGHT)
 
     # Create the level
     platforms, enemies = load_level("map.txt")
