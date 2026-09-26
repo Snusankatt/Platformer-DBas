@@ -1,9 +1,12 @@
+import pickle
+
 import platform
 import player
 import pygame
 import sys
 import enemy
 import prize
+import asyncio
 
 # Constants
 SCREEN_WIDTH = 1920
@@ -71,7 +74,7 @@ def show_exit_button(screen, button_rect, button_text, button_text_rect):
 
 
 
-def main():
+async def main():
     # Starta pygame
     pygame.init()
 
@@ -101,8 +104,10 @@ def main():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
 
-    # Skapa spelaren
+    # Create players
     p = player.Player(SCREEN_WIDTH, SCREEN_HEIGHT)
+
+    p2 = player.Player(SCREEN_WIDTH, SCREEN_HEIGHT)
 
     # Create the level
     platforms, enemies, prizes = load_level("map.txt")
@@ -118,8 +123,45 @@ def main():
 
     death_timer = 0
 
+    # Connect to server
+    reader, writer = await asyncio.open_connection("127.0.0.1", 5000)
+
+    # Get player ID
+    id_package = await reader.read(2048)
+    current_player_id = pickle.loads(id_package)
+
     running = True
     while running:
+
+        # Create the dict that will be sent through network
+        player_data = {"x": p.rect.x, "y": p.rect.y,
+                       "is_alive": p.is_alive, "has_won": p.has_won, "facing_left": p._facing_left,
+                       "current_idle_frame": p._current_idle_frame, "current_running_frame": p._current_running_frame,
+                       "current_death_frame": p._current_death_frame}
+
+        # Package and send data
+        writer.write(pickle.dumps(player_data))
+        await writer.drain()
+
+        # Receive data from server
+        game_state_package = await reader.read(2048)
+        # If empty -> server has problems, exit game
+        if game_state_package == b"":
+            break
+        ngs = pickle.loads(game_state_package) # New game state
+
+        # Unflatten all data
+        for i in ngs:
+            if i != current_player_id:
+                p2.rect.x = ngs[i]["x"]
+                p2.rect.y = ngs[i]["y"]
+                p2.is_alive = ngs[i]["is_alive"]
+                p2.has_won = ngs[i]["has_won"]
+                p2._facing_left = ngs[i]["facing_left"]
+                p2._current_idle_frame = ngs[i]["current_idle_frame"]
+                p2._current_running_frame = ngs[i]["current_running_frame"]
+                p2._current_death_frame = ngs[i]["current_death_frame"]
+
         """
         Time and physics
         """
@@ -189,8 +231,9 @@ def main():
         """
         p.update(dt, platforms, enemies, prizes)
 
-        # Draw Player
+        # Draw Players
         screen.blit(p.image, p.rect)
+        screen.blit(p2.image, p2.rect)
 
         # Draw ending if dead
         if not p.is_alive:
@@ -210,9 +253,11 @@ def main():
 
         pygame.display.flip()
 
+        # Create asynchronous event to allow other processes to run
+        await asyncio.sleep(0)
 
     pygame.quit()
     sys.exit()
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
