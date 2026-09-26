@@ -1,7 +1,9 @@
 import pygame
 
 class Player:
-    def __init__(self):
+    def __init__(self, screen_width, screen_height):
+        self.screen_width = screen_width
+        self.screen_height = screen_height
         """
         Physics
         """
@@ -15,8 +17,11 @@ class Player:
         self.accX = 0
 
         self.speedCap = 500
+        self.running_speed = 4000
+        self.jump_force = -1300
         self.gravity = 4000
         self.friction = self._ground_friction
+        self.stop_velocity = 30 # DONT go over 30
         self.on_ground = False
 
         """
@@ -38,6 +43,7 @@ class Player:
         offset_y = 9
         crop_width = 13
         crop_height = 19
+        image_scale = 3
 
         # Create idle frame list
         self._idle_frames = []
@@ -53,7 +59,7 @@ class Player:
             image = self._spriteSheet.subsurface(rect)
 
             # Rescale
-            image = pygame.transform.scale(image, (39, 57))
+            image = pygame.transform.scale(image, (crop_width * image_scale, crop_height * image_scale))
             self._idle_frames.append(image)
 
         # Create running frame list
@@ -69,7 +75,7 @@ class Player:
             rect = pygame.Rect(frame_x + offset_x - 1, frame_y + offset_y, crop_width + 1, crop_height)
             # Create and rescale
             image = self._spriteSheet.subsurface(rect)
-            image = pygame.transform.scale(image, (42, 57))
+            image = pygame.transform.scale(image, ((crop_width + 1) * image_scale, crop_height * image_scale))
             # Append the image to list
             self._running_frames.append(image)
 
@@ -81,7 +87,7 @@ class Player:
             rect = pygame.Rect(frame_x + offset_x, frame_y + offset_y, crop_width + 5, crop_height)
 
             image = self._spriteSheet.subsurface(rect)
-            image = pygame.transform.scale(image, (54, 57))
+            image = pygame.transform.scale(image, ((crop_width + 5) * image_scale, crop_height * image_scale))
             self._death_frames.append(image)
 
 
@@ -109,7 +115,7 @@ class Player:
         ## Physics Calculations ##
 
         # Cancel velocity if it's too small to prevent sliding forever
-        if abs(self.velX) < 30:
+        if abs(self.velX) < self.stop_velocity:
             self.velX = 0
 
         # Apply accelerations to get velocity
@@ -135,8 +141,8 @@ class Player:
             self.posX = 0
             self.velX = 0
         # Right side
-        if self.posX + self.rect.width >= 1920 and self.velX > 0:
-            self.posX = 1920 - self.rect.width
+        if self.posX + self.rect.width >= self.screen_width and self.velX > 0:
+            self.posX = self.screen_width - self.rect.width
             self.velX = 0
 
         # Platform collision detection
@@ -176,8 +182,8 @@ class Player:
         ## Collision Checks ##
 
         # Ground check
-        if self.posY + self.rect.height >= 1080 and self.velY > 0:
-            self.posY = 1080 - self.rect.height
+        if self.posY + self.rect.height >= self.screen_height and self.velY > 0:
+            self.posY = self.screen_height - self.rect.height
             self.velY = 0
             self.on_ground = True
 

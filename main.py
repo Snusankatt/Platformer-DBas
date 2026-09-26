@@ -4,7 +4,12 @@ import pygame
 import sys
 import enemy
 
+# Constants
+SCREEN_WIDTH = 1920
+SCREEN_HEIGHT = 1080
+
 def load_level(level):
+
     # Create the map list
     level_map = []
     # Open file and put all lines in level_map
@@ -40,26 +45,40 @@ def load_level(level):
     # Return the platforms list
     return level_platforms, level_enemies
 
+def end_screen(screen, font):
+    game_over_text = font.render("GAME OVER", False, (255, 255, 255))
+
+    text_rect = game_over_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+    screen.blit(game_over_text, text_rect)
+
+
 def main():
-    # Starta pygame med ett fönster, sätt storlek och skapa klockan
+    # Starta pygame
     pygame.init()
-    screen = pygame.display.set_mode((1920, 1080))
+
+    # Load font
+    large_font = pygame.font.Font("assets/PixelOperator8-Bold.ttf", 200)
+
+    # Load screen and clock
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
 
     # Skapa spelaren
-    p = player.Player()
+    p = player.Player(SCREEN_HEIGHT, SCREEN_WIDTH)
 
     # Create the level
     platforms, enemies = load_level("map.txt")
 
     # Create bg image
     bg_image = pygame.image.load("assets/background.jpeg")
-    bg_image = pygame.transform.scale(bg_image, (1920, 1080))
+    bg_image = pygame.transform.scale(bg_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
     # Make it darker to distinguish fore/background
-    darken_overlay = pygame.Surface((1920, 1080))
+    darken_overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
     darken_overlay.fill((0, 0, 0))
     darken_overlay.set_alpha(100)
     bg_image.blit(darken_overlay, (0, 0))
+
+    death_timer = 0
 
     running = True
     while running:
@@ -82,9 +101,6 @@ def main():
             pygame.quit()
             sys.exit()
 
-        if not p.is_alive:
-
-
 
         """
         Event handling continuous inputs
@@ -92,13 +108,13 @@ def main():
         keys = pygame.key.get_pressed()
         if p.is_alive:
             if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
-                p.accX = 4000
+                p.accX = p.running_speed
 
             if keys[pygame.K_LEFT] or keys[pygame.K_a]:
-                p.accX = -4000
+                p.accX = -p.running_speed
 
             if (keys[pygame.K_UP] or keys[pygame.K_SPACE] or keys[pygame.K_w]) and (p.on_ground == True):
-                p.velY = -1300
+                p.velY = p.jump_force
         """
         Rendering
         """
@@ -122,6 +138,13 @@ def main():
 
         # Draw Player
         screen.blit(p.image, p.rect)
+
+        # Draw ending if dead
+        if not p.is_alive:
+            death_timer += dt
+
+            if death_timer >= 1:
+                end_screen(screen, large_font)
 
         pygame.display.flip()
 
