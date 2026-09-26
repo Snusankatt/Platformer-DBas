@@ -104,11 +104,6 @@ async def main():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
 
-    # Create players
-    p = player.Player(SCREEN_WIDTH, SCREEN_HEIGHT)
-
-    p2 = player.Player(SCREEN_WIDTH, SCREEN_HEIGHT)
-
     # Create the level
     platforms, enemies, prizes = load_level("map.txt")
 
@@ -129,6 +124,11 @@ async def main():
     # Get player ID
     id_package = await reader.read(2048)
     current_player_id = pickle.loads(id_package)
+
+    # Create players
+    p = player.Player(SCREEN_WIDTH, SCREEN_HEIGHT, current_player_id)
+
+    p2 = player.Player(SCREEN_WIDTH, SCREEN_HEIGHT, 2 if current_player_id == 1 else 1)
 
     running = True
     while running:

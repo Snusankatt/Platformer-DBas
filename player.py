@@ -1,7 +1,7 @@
 import pygame
 
 class Player:
-    def __init__(self, screen_width, screen_height):
+    def __init__(self, screen_width, screen_height, player_id):
         self.screen_width = screen_width
         self.screen_height = screen_height
         """
@@ -33,7 +33,10 @@ class Player:
         """
         Animations
         """
-        self._spriteSheet = pygame.image.load('assets/knight.png')
+        if player_id == 1:
+            self._spriteSheet = pygame.image.load('assets/knight.png')
+        elif player_id == 2:
+            self._spriteSheet = pygame.image.load('assets/knight_p2.png')
         self._frame_width = 32
         self._frame_height = 32
 
