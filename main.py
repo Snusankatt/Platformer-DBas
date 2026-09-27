@@ -1,5 +1,7 @@
 import pickle
+from contextlib import nullcontext
 
+import door
 import platform
 import player
 import pygame
@@ -31,6 +33,8 @@ def load_level(level):
 
     spawn_point = (0, 0)
 
+    level_doors = []
+
     # Row index becomes y pos and col index the x pos
     for row_index, row_string in enumerate(level_map):
         for col_index, char in enumerate(row_string):
@@ -61,9 +65,14 @@ def load_level(level):
                 y_pos = row_index * tile_size
                 spawn_point = (x_pos, y_pos)
 
+            if char == "D":
+                x_pos = col_index * tile_size
+                y_pos = row_index * tile_size
+                new_door = door.Door(x_pos, y_pos)
+                level_doors.append(new_door)
 
     # Return the platforms list
-    return level_platforms, level_enemies, level_prizes, spawn_point
+    return level_platforms, level_enemies, level_prizes, spawn_point, level_doors
 
 def end_screen(screen, game_over_text, text_rect):
     # GAME OVER text
@@ -112,7 +121,7 @@ async def main():
     clock = pygame.time.Clock()
 
     # Create the level
-    platforms, enemies, prizes, spawn_point = load_level("map2.txt")
+    platforms, enemies, prizes, spawn_point, doors = load_level("map2.txt")
 
     # Create bg image
     bg_image = pygame.image.load("assets/background.jpeg")
@@ -236,10 +245,15 @@ async def main():
             screen.blit(e.image, e.rect)
 
         # Prizes
-        for prize in prizes:
-            prize.update(dt)
-            if not prize.should_be_killed:
-                screen.blit(prize.image, prize.rect)
+        for coin in prizes:
+            coin.update(dt)
+            if not coin.should_be_killed:
+                screen.blit(coin.image, coin.rect)
+
+        # Doors
+        for d in doors:
+            d.update(dt)
+            screen.blit(d.image, d.rect)
 
         """
         Display and player update

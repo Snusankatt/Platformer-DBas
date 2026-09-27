@@ -15,6 +15,8 @@ class Door:
 
         rect = pygame.Rect(2*frame_size + offset_x, 8*frame_size, crop_width, crop_height)
         self.image = self._spritesheet.subsurface(rect)
+        self.image = pygame.transform.scale(self.image, (40, 64))
+        self.rect = self.image.get_rect(topleft=(x + offset_x*4, y))
 
     def update(self, T):
         if self.closed:
