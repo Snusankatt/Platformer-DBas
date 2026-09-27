@@ -29,6 +29,8 @@ def load_level(level):
 
     level_prizes = []
 
+    spawn_point = (0, 0)
+
     # Row index becomes y pos and col index the x pos
     for row_index, row_string in enumerate(level_map):
         for col_index, char in enumerate(row_string):
@@ -54,9 +56,14 @@ def load_level(level):
                 new_prize = prize.Prize(x_pos, y_pos)
                 level_prizes.append(new_prize)
 
+            if char == "S":
+                x_pos = col_index * tile_size
+                y_pos = row_index * tile_size
+                spawn_point = (x_pos, y_pos)
+
 
     # Return the platforms list
-    return level_platforms, level_enemies, level_prizes
+    return level_platforms, level_enemies, level_prizes, spawn_point
 
 def end_screen(screen, game_over_text, text_rect):
     # GAME OVER text
@@ -105,7 +112,7 @@ async def main():
     clock = pygame.time.Clock()
 
     # Create the level
-    platforms, enemies, prizes = load_level("map.txt")
+    platforms, enemies, prizes, spawn_point = load_level("map2.txt")
 
     # Create bg image
     bg_image = pygame.image.load("assets/background.jpeg")
@@ -127,8 +134,13 @@ async def main():
 
     # Create players
     p = player.Player(SCREEN_WIDTH, SCREEN_HEIGHT, current_player_id)
-
     p2 = player.Player(SCREEN_WIDTH, SCREEN_HEIGHT, 2 if current_player_id == 1 else 1)
+
+    # Spawn them at spawn point
+    p.posX, p.posY = spawn_point
+    p.posY -= p.rect.height
+    p2.posX, p2.posY = spawn_point
+    p2.posY -= p2.rect.height
 
     running = True
     while running:
