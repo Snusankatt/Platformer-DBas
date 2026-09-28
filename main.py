@@ -49,10 +49,10 @@ def load_level(level):
                 new_platform = platform.Platform(x_pos, y_pos, char)
                 level_platforms.append(new_platform)
 
-            if char == "E":
+            if char in ("E", "e"):
                 x_pos = col_index * tile_size
                 y_pos = row_index * tile_size
-                new_enemy = enemy.Enemy(x_pos, y_pos)
+                new_enemy = enemy.Enemy(x_pos, y_pos, char)
                 level_enemies.append(new_enemy)
 
             if char == "C":
@@ -103,7 +103,6 @@ async def main():
     # Starta pygame
     pygame.init()
 
-
     # Prepare end screen
     # Load font
     large_font = pygame.font.Font("assets/PixelOperator8-Bold.ttf", 200)
@@ -132,16 +131,16 @@ async def main():
     # Capture the string that your menu function returns
     selected_map = level_select_screen(screen)
 
-    await run_game(button_rect, button_text, button_text_rect, clock, game_over_text, go_text_rect, screen,
-                   you_won_text, yw_text_rect, selected_map)
 
+    await run_game(button_rect, button_text, button_text_rect, clock, game_over_text, go_text_rect, screen,
+                       you_won_text, yw_text_rect, selected_map)
 
 def level_select_screen(screen):
     running = True
     screen.fill((30, 30, 30)) # clear screen
 
     # 1. Load and scale the background image just like you did in run_game
-    title_bg = pygame.image.load("assets/title_screen.jpg").convert()
+    title_bg = pygame.image.load("assets/title_screen.jpg")
     title_bg = pygame.transform.scale(title_bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
     font = pygame.font.SysFont(None, 48)
@@ -209,7 +208,7 @@ async def run_game(button_rect, button_text, button_text_rect, clock, game_over_
     bg_image.blit(darken_overlay, (0, 0))
     death_timer = 0
     # Connect to server
-    reader, writer = await asyncio.open_connection("127.0.0.1", 6967)
+    reader, writer = await asyncio.open_connection("195.178.161.102", 6967)
     # Get player ID
     id_package = await reader.read(2048)
     current_player_id = pickle.loads(id_package)

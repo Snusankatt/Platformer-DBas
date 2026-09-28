@@ -1,8 +1,11 @@
 import pygame
 
 class Enemy:
-    def __init__(self, x, y):
-        self._spritesheet = pygame.image.load("./assets/slime_purple.png")
+    def __init__(self, x, y, color):
+        if color == "E":
+            self._spritesheet = pygame.image.load("./assets/slime_purple.png")
+        elif color == "e":
+            self._spritesheet = pygame.image.load("./assets/slime_green.png")
 
         offset_x = 5
         offset_y = 9
