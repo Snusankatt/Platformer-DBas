@@ -144,7 +144,7 @@ async def main():
     death_timer = 0
 
     # Connect to server
-    reader, writer = await asyncio.open_connection("127.0.0.1", 5000)
+    reader, writer = await asyncio.open_connection("195.178.161.102", 6967)
 
     # Get player ID
     id_package = await reader.read(2048)

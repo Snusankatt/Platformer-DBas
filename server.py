@@ -51,7 +51,7 @@ async def handle_client(reader, writer):
 # Main server code
 async def main():
     # Start a server that has the handle_client as default function when new connection
-    server = await asyncio.start_server(handle_client, '127.0.0.1', 5000)
+    server = await asyncio.start_server(handle_client, '0.0.0.0', 6967)
     # Let the server run forever
     await server.serve_forever()
 
