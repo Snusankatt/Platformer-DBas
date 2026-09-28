@@ -37,6 +37,9 @@ class Player:
             self._spriteSheet = pygame.image.load('assets/knight.png')
         elif player_id == 2:
             self._spriteSheet = pygame.image.load('assets/knight_p2.png')
+        else:
+            print(f"WARNING: Received weird player_id: {player_id}. Defaulting to Player 1 image.")
+            self._spriteSheet = pygame.image.load('assets/knight.png')
         self._frame_width = 32
         self._frame_height = 32
 

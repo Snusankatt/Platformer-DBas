@@ -129,9 +129,76 @@ async def main():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
 
-    # Create the level
-    platforms, enemies, prizes, spawn_point, doors, buttons = load_level("map2.txt")
+    # Capture the string that your menu function returns
+    selected_map = level_select_screen(screen)
 
+    await run_game(button_rect, button_text, button_text_rect, clock, game_over_text, go_text_rect, screen,
+                   you_won_text, yw_text_rect, selected_map)
+
+
+def level_select_screen(screen):
+    running = True
+    screen.fill((30, 30, 30)) # clear screen
+
+    # 1. Load and scale the background image just like you did in run_game
+    title_bg = pygame.image.load("assets/title_screen.jpg").convert()
+    title_bg = pygame.transform.scale(title_bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
+    font = pygame.font.SysFont(None, 48)
+    level1 = pygame.Rect(760, 490, 400, 80)
+    level2 = pygame.Rect(760, 610, 400, 80)
+    level3 = pygame.Rect(760, 730, 400, 80)
+    level4 = pygame.Rect(760, 850, 400, 80)
+    while running:
+        screen.blit(title_bg, (0, 0)) # background
+
+
+        pygame.draw.rect(screen,(255, 0, 0), level1)
+        pygame.draw.rect(screen, (255, 0, 0), level2)
+        pygame.draw.rect(screen, (255, 0, 0), level3)
+        pygame.draw.rect(screen, (255, 0, 0), level4)
+
+        level1_text = font.render("Level 1", True, (255, 255, 255))
+        level1_text_rect = level1_text.get_rect(center=level1.center)
+        screen.blit(level1_text, level1_text_rect)
+
+        level2_text = font.render("Level 2", True, (255, 255, 255))
+        level2_text_rect = level2_text.get_rect(center=level2.center)
+        screen.blit(level2_text, level2_text_rect)
+
+        level3_text = font.render("Level 3", True, (255, 255, 255))
+        level3_text_rect = level3_text.get_rect(center=level3.center)
+        screen.blit(level3_text, level3_text_rect)
+
+        level4_text = font.render("Level 4", True, (255, 255, 255))
+        level4_text_rect = level4_text.get_rect(center=level4.center)
+        screen.blit(level4_text, level4_text_rect)
+
+
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    mouse_position = event.pos # xy kordinat for vart musknappentrycktes
+                    if level1.collidepoint(mouse_position):
+                        return "level1.txt"
+                    elif level2.collidepoint(mouse_position):
+                        return "level2.txt"
+                    elif level3.collidepoint(mouse_position):
+                        return "level3.txt"
+                    elif level4.collidepoint(mouse_position):
+                        return "level4.txt"
+
+
+async def run_game(button_rect, button_text, button_text_rect, clock, game_over_text, go_text_rect, screen,
+                   you_won_text, yw_text_rect, map_filename):
+    # Create the level
+    platforms, enemies, prizes, spawn_point, doors, buttons = load_level(map_filename)
     # Create bg image
     bg_image = pygame.image.load("assets/background.jpeg")
     bg_image = pygame.transform.scale(bg_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -140,33 +207,34 @@ async def main():
     darken_overlay.fill((0, 0, 0))
     darken_overlay.set_alpha(100)
     bg_image.blit(darken_overlay, (0, 0))
-
     death_timer = 0
-
     # Connect to server
-    reader, writer = await asyncio.open_connection("195.178.161.102", 6967)
-
+    reader, writer = await asyncio.open_connection("127.0.0.1", 6967)
     # Get player ID
     id_package = await reader.read(2048)
     current_player_id = pickle.loads(id_package)
 
+    # debug
+    print(f"DEBUG: The server gave me ID: {current_player_id} (Type: {type(current_player_id)})")
+
     # Create players
     p = player.Player(SCREEN_WIDTH, SCREEN_HEIGHT, current_player_id)
     p2 = player.Player(SCREEN_WIDTH, SCREEN_HEIGHT, 2 if current_player_id == 1 else 1)
-
     # Spawn them at spawn point
     p.posX, p.posY = spawn_point
     p.posY -= p.rect.height
     p2.posX, p2.posY = spawn_point
     p2.posY -= p2.rect.height
-
     running = True
+
+    clock.tick(60) # reset timer otherwise character falls 4000 blocks cause it takes the time in level selector as falling time
     while running:
 
         # Create the dict that will be sent through network
         player_data = {"x": p.rect.x, "y": p.rect.y, "vel": p.velX,
                        "is_alive": p.is_alive, "has_won": p.has_won, "facing_left": p._facing_left,
-                       "current_idle_frame": p._current_idle_frame, "current_running_frame": p._current_running_frame, "current_death_frame": p._current_death_frame,
+                       "current_idle_frame": p._current_idle_frame, "current_running_frame": p._current_running_frame,
+                       "current_death_frame": p._current_death_frame,
                        "prizes": [prize.is_collected for prize in prizes]}
 
         # Package and send data
@@ -178,7 +246,7 @@ async def main():
         # If empty -> server has problems, exit game
         if game_state_package == b"":
             break
-        ngs = pickle.loads(game_state_package) # New game state
+        ngs = pickle.loads(game_state_package)  # New game state
 
         # Unflatten all data
         for i in ngs:
@@ -221,8 +289,6 @@ async def main():
         if pygame.key.get_pressed()[pygame.K_DELETE]:
             pygame.quit()
             sys.exit()
-
-
 
         """
         Event handling continuous inputs
@@ -290,7 +356,6 @@ async def main():
                 if not p2.is_alive:
                     show_exit_button(screen, button_rect, button_text, button_text_rect)
 
-
         # Draw win screen if done
         if p.has_won or p2.has_won:
 
@@ -304,9 +369,9 @@ async def main():
 
         # Create asynchronous event to allow other processes to run
         await asyncio.sleep(0)
-
     pygame.quit()
     sys.exit()
+
 
 if __name__ == "__main__":
     asyncio.run(main())
