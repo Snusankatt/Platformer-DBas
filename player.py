@@ -185,11 +185,9 @@ class Player:
 
         ## Collision Checks ##
 
-        # Ground check
-        if self.posY + self.rect.height >= self.screen_height and self.velY > 0:
-            self.posY = self.screen_height - self.rect.height
-            self.velY = 0
-            self.on_ground = True
+        # Fall off map check
+        if self.posY >= self.screen_height and self.velY > 0:
+            self.is_alive = False
 
         # Platform collision
         if self.rect.collidelist(platforms) != -1: # -1 if no collision
