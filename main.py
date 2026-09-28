@@ -99,7 +99,6 @@ def show_exit_button(screen, button_rect, button_text, button_text_rect):
 
 
 async def main():
-    restart = False
 
     # Starta pygame
     pygame.init()
@@ -216,13 +215,8 @@ async def main():
             # Exit button
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1 and button_rect.collidepoint(event.pos):
-                    restart = True
-                    running = False
-                    break
-                    """
                     pygame.quit()
                     sys.exit()
-                    """
 
         if pygame.key.get_pressed()[pygame.K_DELETE]:
             pygame.quit()
@@ -311,12 +305,8 @@ async def main():
         # Create asynchronous event to allow other processes to run
         await asyncio.sleep(0)
 
-    return restart
-
-if __name__ == "__main__":
-    keep_playing = True
-    while keep_playing:
-        keep_playing = asyncio.run(main())
-
     pygame.quit()
     sys.exit()
+
+if __name__ == "__main__":
+    asyncio.run(main())
