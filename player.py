@@ -106,16 +106,16 @@ class Player:
         self.rect = self.image.get_rect(topleft=(self.posX, self.posY))
 
 
-    def update(self, T, platforms, enemies, prizes, doors):
+    def update(self, T, platforms, enemies, prizes, doors, buttons):
         self._updateState(enemies, prizes)
-        self._updateX(T, platforms, doors)
-        self._updateY(T, platforms)
+        self._updateX(T, platforms, doors, buttons)
+        self._updateY(T, platforms, buttons)
         self._updateAnimation(T)
 
     """
     Physics
     """
-    def _updateX(self, T, platforms, doors):
+    def _updateX(self, T, platforms, doors, buttons):
         ## Physics Calculations ##
 
         # Cancel velocity if it's too small to prevent sliding forever
@@ -182,7 +182,20 @@ class Player:
                 self.posX = self.rect.x
                 self.velX = 0
 
-    def _updateY(self, T, platforms):
+        # Button collision detection
+        if self.rect.collidelist(buttons) != -1:
+            ind = self.rect.collidelist(buttons)
+            button = buttons[ind]
+            if self.rect.colliderect(button.rect):
+                if self.velX > 0:
+                    self.rect.right = button.rect.left
+                elif self.velX < 0:
+                    self.rect.left = button.rect.right
+
+                self.posX = self.rect.x
+                self.velX = 0
+
+    def _updateY(self, T, platforms, buttons):
         ## Physics calc ##
 
         # Standard state is not on ground
@@ -225,6 +238,16 @@ class Player:
                     self.rect.top = plat.rect.bottom
                     self.posY = int(self.rect.y)
                     self.velY = 0
+
+        # Button collision
+        if self.rect.collidelist(buttons) != -1:
+            ind = self.rect.collidelist(buttons)
+            button = buttons[ind]
+            if self.rect.colliderect(button.rect):
+                if self.velY > 0:
+                    self.on_ground = True
+                    self.rect.bottom = button.rect.top
+                    self.posY = int(self.rect.y)
 
 
         # Ground logic

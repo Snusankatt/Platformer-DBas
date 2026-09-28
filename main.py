@@ -9,6 +9,7 @@ import sys
 import enemy
 import prize
 import asyncio
+import button
 
 # Constants
 SCREEN_WIDTH = 1920
@@ -34,6 +35,8 @@ def load_level(level):
     spawn_point = (0, 0)
 
     level_doors = []
+
+    level_buttons = []
 
     # Row index becomes y pos and col index the x pos
     for row_index, row_string in enumerate(level_map):
@@ -71,8 +74,14 @@ def load_level(level):
                 new_door = door.Door(x_pos, y_pos)
                 level_doors.append(new_door)
 
+            if char == "B":
+                x_pos = col_index * tile_size
+                y_pos = row_index * tile_size
+                new_button = button.Button(x_pos, y_pos)
+                level_buttons.append(new_button)
+
     # Return the platforms list
-    return level_platforms, level_enemies, level_prizes, spawn_point, level_doors
+    return level_platforms, level_enemies, level_prizes, spawn_point, level_doors, level_buttons
 
 def end_screen(screen, game_over_text, text_rect):
     # GAME OVER text
@@ -121,7 +130,7 @@ async def main():
     clock = pygame.time.Clock()
 
     # Create the level
-    platforms, enemies, prizes, spawn_point, doors = load_level("map2.txt")
+    platforms, enemies, prizes, spawn_point, doors, buttons = load_level("map2.txt")
 
     # Create bg image
     bg_image = pygame.image.load("assets/background.jpeg")
@@ -252,13 +261,18 @@ async def main():
 
         # Doors
         for d in doors:
-            d.update(dt)
+            d.update(dt, buttons)
             screen.blit(d.image, d.rect)
+
+        # Buttons
+        for b in buttons:
+            b.update([p, p2])
+            screen.blit(b.image, b.rect)
 
         """
         Display and player update
         """
-        p.update(dt, platforms, enemies, prizes, doors)
+        p.update(dt, platforms, enemies, prizes, doors, buttons)
         p2._updateAnimation(dt)
 
         # Draw Players
