@@ -106,16 +106,16 @@ class Player:
         self.rect = self.image.get_rect(topleft=(self.posX, self.posY))
 
 
-    def update(self, T, platforms, enemies, prizes):
+    def update(self, T, platforms, enemies, prizes, doors):
         self._updateState(enemies, prizes)
-        self._updateX(T, platforms)
+        self._updateX(T, platforms, doors)
         self._updateY(T, platforms)
         self._updateAnimation(T)
 
     """
     Physics
     """
-    def _updateX(self, T, platforms):
+    def _updateX(self, T, platforms, doors):
         ## Physics Calculations ##
 
         # Cancel velocity if it's too small to prevent sliding forever
@@ -168,6 +168,19 @@ class Player:
                     self.rect.left = plat.rect.right
                     self.posX = self.rect.x
                     self.velX = 0
+
+        # Door collision detection
+        if self.rect.collidelist(doors) != -1:
+            ind = self.rect.collidelist(doors)
+            door = doors[ind]
+            if self.rect.colliderect(door.rect):
+                if self.velX > 0:
+                    self.rect.right = door.rect.left
+                elif self.velX < 0:
+                    self.rect.left = door.rect.right
+
+                self.posX = self.rect.x
+                self.velX = 0
 
     def _updateY(self, T, platforms):
         ## Physics calc ##

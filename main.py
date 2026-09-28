@@ -258,7 +258,7 @@ async def main():
         """
         Display and player update
         """
-        p.update(dt, platforms, enemies, prizes)
+        p.update(dt, platforms, enemies, prizes, doors)
         p2._updateAnimation(dt)
 
         # Draw Players
