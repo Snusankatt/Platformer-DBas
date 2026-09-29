@@ -128,16 +128,25 @@ async def main():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
 
+    # Unlocked Levels
+    unlocked = [True, False, False, False]
+
     # Stay in the game loop
     while True:
         # Capture the string that your menu function returns
-        selected_map = level_select_screen(screen)
+        selected_map = level_select_screen(screen, unlocked)
 
+        current_level = int(selected_map[5:-4])
 
-        await run_game(button_rect, button_text, button_text_rect, clock, game_over_text, go_text_rect, screen,
+        beaten = await run_game(button_rect, button_text, button_text_rect, clock, game_over_text, go_text_rect, screen,
                            you_won_text, yw_text_rect, selected_map)
 
-def level_select_screen(screen):
+        # Only update in never beaten before
+        if not unlocked[current_level]:
+            unlocked[current_level] = beaten
+
+
+def level_select_screen(screen, level_unlocked):
     running = True
     screen.fill((30, 30, 30)) # clear screen
 
@@ -150,14 +159,15 @@ def level_select_screen(screen):
     level2 = pygame.Rect(760, 610, 400, 80)
     level3 = pygame.Rect(760, 730, 400, 80)
     level4 = pygame.Rect(760, 850, 400, 80)
+
     while running:
         screen.blit(title_bg, (0, 0)) # background
 
 
-        pygame.draw.rect(screen,(255, 0, 0), level1)
-        pygame.draw.rect(screen, (255, 0, 0), level2)
-        pygame.draw.rect(screen, (255, 0, 0), level3)
-        pygame.draw.rect(screen, (255, 0, 0), level4)
+        pygame.draw.rect(screen, "green" if level_unlocked[0] else "red", level1)
+        pygame.draw.rect(screen, "green" if level_unlocked[1] else "red", level2)
+        pygame.draw.rect(screen, "green" if level_unlocked[2] else "red", level3)
+        pygame.draw.rect(screen, "green" if level_unlocked[3] else "red", level4)
 
         level1_text = font.render("Level 1", True, (255, 255, 255))
         level1_text_rect = level1_text.get_rect(center=level1.center)
@@ -185,14 +195,14 @@ def level_select_screen(screen):
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
-                    mouse_position = event.pos # xy kordinat for vart musknappentrycktes
+                    mouse_position = event.pos # xy koordinat for vart musknappentrycktes
                     if level1.collidepoint(mouse_position):
                         return "level1.txt"
-                    elif level2.collidepoint(mouse_position):
+                    elif level2.collidepoint(mouse_position) and level_unlocked[1]:
                         return "level2.txt"
-                    elif level3.collidepoint(mouse_position):
+                    elif level3.collidepoint(mouse_position) and level_unlocked[2]:
                         return "level3.txt"
-                    elif level4.collidepoint(mouse_position):
+                    elif level4.collidepoint(mouse_position) and level_unlocked[3]:
                         return "level4.txt"
 
 
@@ -376,8 +386,12 @@ async def run_game(button_rect, button_text, button_text_rect, clock, game_over_
 
         # Create asynchronous event to allow other processes to run
         await asyncio.sleep(0)
+
     writer.close()
     await writer.wait_closed()
+
+    # Return completed state
+    return p.has_won or p2.has_won
 
 
 if __name__ == "__main__":
