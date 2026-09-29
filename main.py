@@ -128,12 +128,14 @@ async def main():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
 
-    # Capture the string that your menu function returns
-    selected_map = level_select_screen(screen)
+    # Stay in the game loop
+    while True:
+        # Capture the string that your menu function returns
+        selected_map = level_select_screen(screen)
 
 
-    await run_game(button_rect, button_text, button_text_rect, clock, game_over_text, go_text_rect, screen,
-                       you_won_text, yw_text_rect, selected_map)
+        await run_game(button_rect, button_text, button_text_rect, clock, game_over_text, go_text_rect, screen,
+                           you_won_text, yw_text_rect, selected_map)
 
 def level_select_screen(screen):
     running = True
@@ -226,6 +228,8 @@ async def run_game(button_rect, button_text, button_text_rect, clock, game_over_
     p2.posY -= p2.rect.height
     running = True
 
+    exit_button_active = False
+
     clock.tick(60) # reset timer otherwise character falls 4000 blocks cause it takes the time in level selector as falling time
     while running:
 
@@ -276,15 +280,17 @@ async def run_game(button_rect, button_text, button_text_rect, clock, game_over_
         Event handling discrete inputs
         """
         for event in pygame.event.get():
+            # Close game
             if event.type == pygame.QUIT:
-                running = False
+                pygame.quit()
+                sys.exit()
 
             # Exit button
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1 and button_rect.collidepoint(event.pos):
-                    pygame.quit()
-                    sys.exit()
+                if event.button == 1 and button_rect.collidepoint(event.pos) and exit_button_active:
+                    running = False
 
+        # Debug force quit
         if pygame.key.get_pressed()[pygame.K_DELETE]:
             pygame.quit()
             sys.exit()
@@ -354,6 +360,7 @@ async def run_game(button_rect, button_text, button_text_rect, clock, game_over_
                 # Only let player exit if both are dead
                 if not p2.is_alive:
                     show_exit_button(screen, button_rect, button_text, button_text_rect)
+                    exit_button_active = True
 
         # Draw win screen if done
         if p.has_won or p2.has_won:
@@ -363,13 +370,14 @@ async def run_game(button_rect, button_text, button_text_rect, clock, game_over_
             if death_timer >= 1:
                 win_screen(screen, you_won_text, yw_text_rect)
                 show_exit_button(screen, button_rect, button_text, button_text_rect)
+                exit_button_active = True
 
         pygame.display.flip()
 
         # Create asynchronous event to allow other processes to run
         await asyncio.sleep(0)
-    pygame.quit()
-    sys.exit()
+    writer.close()
+    await writer.wait_closed()
 
 
 if __name__ == "__main__":
