@@ -133,6 +133,7 @@ async def main():
 
     # Stay in the game loop
     while True:
+
         # Capture the string that your menu function returns
         selected_map = level_select_screen(screen, unlocked)
 
@@ -161,6 +162,12 @@ def level_select_screen(screen, level_unlocked):
     level4 = pygame.Rect(760, 850, 400, 80)
 
     while running:
+
+        # Game dev cheat
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_u]:
+            level_unlocked = [True, True, True, True]
+
         screen.blit(title_bg, (0, 0)) # background
 
 
@@ -187,6 +194,7 @@ def level_select_screen(screen, level_unlocked):
 
 
         pygame.display.flip()
+
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
