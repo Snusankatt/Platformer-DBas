@@ -261,9 +261,14 @@ async def run_game(button_rect, button_text, button_text_rect, clock, game_over_
             break
         ngs = pickle.loads(game_state_package)  # New game state
 
+        p2_connected = False
+
         # Unflatten all data
         for i in ngs:
             if i != current_player_id:
+                # We found a p2
+                p2_connected = True
+
                 p2.rect.x = ngs[i]["x"]
                 p2.rect.y = ngs[i]["y"]
                 p2.velX = ngs[i]["vel"]
@@ -353,14 +358,16 @@ async def run_game(button_rect, button_text, button_text_rect, clock, game_over_
         """
         Display and player update
         """
+        # Update and draw p1
         p.update(dt, platforms, enemies, prizes, doors, buttons)
-        p2._updateAnimation(dt)
-
-        # Draw Players
         screen.blit(p.image, p.rect)
-        screen.blit(p2.image, p2.rect)
 
-        # Draw ending if dead
+        # Update and draw p2 if theyre connected
+        if p2_connected:
+            p2._updateAnimation(dt)
+            screen.blit(p2.image, p2.rect)
+
+        # Draw ending if both dead or p2 is DCed
         if not p.is_alive and not p.has_won:
             death_timer += dt
 
@@ -368,7 +375,7 @@ async def run_game(button_rect, button_text, button_text_rect, clock, game_over_
                 end_screen(screen, game_over_text, go_text_rect)
 
                 # Only let player exit if both are dead
-                if not p2.is_alive:
+                if not p2.is_alive or not p2_connected:
                     show_exit_button(screen, button_rect, button_text, button_text_rect)
                     exit_button_active = True
 
