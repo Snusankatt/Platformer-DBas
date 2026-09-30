@@ -137,7 +137,7 @@ async def main():
         # Capture the string that your menu function returns
         selected_map = level_select_screen(screen, unlocked)
 
-        current_level = int(selected_map[5:-4])
+        current_level = int(selected_map[5:-4]) - 1
 
         beaten = await run_game(button_rect, button_text, button_text_rect, clock, game_over_text, go_text_rect, screen,
                            you_won_text, yw_text_rect, selected_map)
@@ -228,7 +228,7 @@ async def run_game(button_rect, button_text, button_text_rect, clock, game_over_
     bg_image.blit(darken_overlay, (0, 0))
     death_timer = 0
     # Connect to server
-    reader, writer = await asyncio.open_connection("195.178.161.102", 6967)
+    reader, writer = await asyncio.open_connection("127.0.0.1", 6967)
     # Get player ID
     id_package = await reader.read(2048)
     current_player_id = pickle.loads(id_package)
